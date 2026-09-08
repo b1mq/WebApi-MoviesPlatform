@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Application.Interfaces;
+using Application.Services;
 using Domain.Entities;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +15,7 @@ namespace Application.Extensions
     {
         public static IServiceCollection AddApplication(this IServiceCollection sc)
         {
-            sc.AddScoped<IFilmService, IFilmService>();
+            sc.AddScoped<IFilmService, FilmService>();
             sc.AddValidatorsFromAssembly(typeof(ApplicationServiceExtension).Assembly);
             return sc;
         }
