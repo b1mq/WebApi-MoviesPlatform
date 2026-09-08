@@ -44,7 +44,7 @@ namespace WebApplication1
                 app.UseHttpsRedirection();
                 app.UseAuthorization();
                 app.UseCors("AllowReactApp");
-                app.MapControllers();
+                app.MapControllers(); / 1
 
                 app.Run();
             }
