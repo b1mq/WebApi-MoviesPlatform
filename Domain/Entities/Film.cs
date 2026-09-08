@@ -13,6 +13,7 @@ namespace Domain.Entities
         public string Description { get; private set; } = string.Empty;
         public int Year { get; private set; }
         public string Author {  get; private set; } = string.Empty ;
+        public string PosterUrl { get; private set; } = string.Empty;
         private DateTime _createdAt;
         private DateTime _updatedAt;
         public static Result<Film> Create(int Id,string Title,string Description,int Year,string Author)
@@ -41,16 +42,27 @@ namespace Domain.Entities
             return Result<Film>.Success(film);
         }
         private Film() { }
-        private Film(int Id,string Title,string Description,int Year,string Author)
+        private Film(int Id,string Title,string Description,int Year,string Author,string PosterUrl)
         {
             this.Id = Id;
             this.Title = Title;
             this.Description = Description;
             this.Year = Year;
             this.Author = Author;
+            this.PosterUrl = PosterUrl;
             _createdAt = DateTime.UtcNow;
         }
         public void FilmUpdated() => _updatedAt = DateTime.UtcNow;
+        public Result SetPoster(string url)
+        {
+            if(string.IsNullOrWhiteSpace(url))
+            {
+                return Result.Failure("Poster url can not be empty");
+            }
+            PosterUrl = url;
+            FilmUpdated();
+            return Result.Success();
+        }
         public Result SetTitle(string title)
         {
             if(string.IsNullOrWhiteSpace(title) )
