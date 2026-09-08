@@ -1,32 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Firestore;
 using Domain.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using Infrastructure.Repository;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
 namespace Infrastructure.Extensions
 {
     public static class InfrastructureServiceExtensions
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection sc, IConfiguration configuration)
+        public static IServiceCollection AddInfrastructure(
+            this IServiceCollection services,
+            IConfiguration configuration)
         {
-            var path = configuration["FirebaseKeysPath"] ?? Path.Combine(AppContext.BaseDirectory, "Firebase-Key.json");
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
+            var path = configuration["FirebaseKeysPath"]
+                ?? Path.Combine(
+                    AppContext.BaseDirectory,
+                    "Firebase-Key.json");
 
-            // Получаем ProjectId из конфигурации или подставляем твой ID проекта из Firebase
-            var projectId = configuration["FirebaseProjectId"] ?? "moviesplatform-d1d9b";
+            if (!File.Exists(path))
+            {
+                throw new FileNotFoundException(
+                    $"Firebase key file not found: {path}");
+            }
 
-            // Регистрируем FirestoreDb как Singleton, чтобы он переиспользовался во всем приложении
-            sc.AddSingleton(FirestoreDb.Create(projectId));
+            Console.WriteLine($"Firebase key: {path}");
 
-            // Регистрируем репозиторий
-            sc.AddScoped<IFilmRepository, FirebaseFilmRepository>();
+            var credential = GoogleCredential
+                .FromFile(path)
+                .CreateScoped("https://www.googleapis.com/auth/cloud-platform");
 
-            return sc;
+            Console.WriteLine(
+                $"Firebase credential loaded successfully.");
+
+            var projectId = "moviesplatform-d1d9b";
+
+            var firestoreDb = new FirestoreDbBuilder
+            {
+                ProjectId = projectId,
+                Credential = credential
+            }.Build();
+
+            services.AddSingleton(firestoreDb);
+            services.AddScoped<IFilmRepository, FirebaseFilmRepository>();
+
+            return services;
         }
     }
 }

@@ -53,5 +53,14 @@ namespace Application.Services
             }
             return Result.Success();
         }
+        public async Task<Film?> GetFilmByIdAsync(int id)
+        {
+            var succes = await _filmRepository.GetFilmByIdAsync(id);
+            if(succes != null)
+            {
+                return succes;
+            }
+            return null;
+        }
     }
 }

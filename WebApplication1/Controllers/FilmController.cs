@@ -19,6 +19,12 @@ namespace WebApplication1.Controllers
             var res = await _filmService.GetAllFilmsAsync();
             return Ok(res);
         }
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Film?>> GetFilmById(int id)
+        {
+            var res = await _filmService.GetFilmByIdAsync(id);
+            return Ok(res);
+        }
         [HttpPost]
         public async Task<IActionResult> CreateFilm([FromBody] CreateFilmDto dto)
         {

@@ -12,6 +12,7 @@ namespace Application.Interfaces
     {
         Task<IEnumerable<Film>> GetAllFilmsAsync();
         Task<Result> AddFilmAsync(CreateFilmDto dto);
+        Task<Film?> GetFilmByIdAsync(int id);
         Task<Result> DeleteFilmAsync(int id);
     }
 }
