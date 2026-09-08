@@ -24,6 +24,15 @@ namespace WebApplication1
 
             try
             {
+                builder.Services.AddCors(options =>
+                {
+                    options.AddPolicy("AllowReactApp", policy =>
+                    {
+                        policy.WithOrigins("http://localhost:3000") // Замени на актуальный порт твоего React-приложения
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    });
+                });
                 var app = builder.Build();
 
                 if (app.Environment.IsDevelopment())
@@ -34,6 +43,7 @@ namespace WebApplication1
 
                 app.UseHttpsRedirection();
                 app.UseAuthorization();
+                app.UseCors("AllowReactApp");
                 app.MapControllers();
 
                 app.Run();
