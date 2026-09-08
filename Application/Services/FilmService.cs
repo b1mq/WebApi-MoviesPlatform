@@ -7,18 +7,33 @@ using Application.Interfaces;
 using Domain.Interfaces;
 using Domain.Entities;
 using Domain.Common;
+using FluentValidation;
+using Application.Dtos;
 namespace Application.Services
 {
     public class FilmService:IFilmService
     {
         private readonly IFilmRepository _filmRepository;
-        public FilmService(IFilmRepository filmRepository)
+        private readonly IValidator<CreateFilmDto> _validator;
+        public FilmService(IFilmRepository filmRepository,IValidator<CreateFilmDto> validator)
         {
+            _validator = validator;
             _filmRepository = filmRepository;
         }
-        public async Task<Result> AddFilmAsync(Film film)
+        public async Task<Result> AddFilmAsync(CreateFilmDto dto)
         {
-            var success = await _filmRepository.AddNewFilmAsync(film);
+            var validationres = await _validator.ValidateAsync(dto);
+            if(!validationres.IsValid)
+            {
+                var errors = string.Join("; ", validationres.Errors.Select(e => e.ErrorMessage));
+                return Result.Failure(errors);
+            }
+            var filmResult = Film.Create(dto.Id, dto.Title, dto.Description, dto.Year, dto.Author);
+            if(!filmResult.isSuccess)
+            {
+                return Result.Failure(filmResult.Error);
+            }
+            var success = await _filmRepository.AddNewFilmAsync(filmResult.Value);
             if(!success)
             {
                 return Result.Failure("Failed to add film to DB");
